@@ -1,0 +1,42 @@
+[package]
+name = "vapours"
+version = "0.0.0"
+description = "A collection of utilities surrounding vapoursynth4-rs."
+license = "MIT"
+edition = "2021"
+
+[features]
+default = []
+
+[dependencies]
+const-str = "^0.5.7"
+miette = "^7.2.0"
+num-derive = "^0.4.2"
+num-traits = "^0.2.19"
+seq-macro = "^0.3.5"
+strum = "^0.26.3"
+strum_macros = "^0.26.4"
+thiserror = "^1.0.64"
+vapoursynth4-rs = { git = "https://github.com/inflation/vapoursynth4-rs", rev = "05216423fb4316bf29f4e592ffc12c5a6e61bc25" }
+
+[dev-dependencies]
+approx = "^0.5.1"
+rstest = "^0.23.0"
+
+[lints.clippy]
+cargo = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+cargo_common_metadata = { level = "allow" }
+cast_possible_truncation = { level = "allow" }
+cast_possible_wrap = { level = "allow" }
+cast_sign_loss = { level = "allow" }
+module_name_repetitions = { level = "allow" }
+unreadable_literal = { level = "allow" }
+
+[lints.rustdoc]
+all = { level = "warn" }
+
+[package.metadata.cargo-shear]
+ignored = ["strum"]
