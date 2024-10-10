@@ -28,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - uses: cargo-bins/cargo-binstall@v1.10.6
 
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
