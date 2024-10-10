@@ -1,4 +1,19 @@
 //! [`VideoFrame`] utilities.
+//!
+//! Within this module, types that deal with the data of a plane have a type
+//! parameter `T` that represents the pixel type. It is up to the caller to know
+//! the bit depth and sample type of the video frame and to pass the equivalent
+//! number type accordingly. The most common examples are:
+//!
+//! | Bit depth | Sample type             | `T`     |
+//! | --------- | ----------------------- | ------- |
+//! | 8         | [`SampleType::Integer`] | [`u8`]  |
+//! | 10        | [`SampleType::Integer`] | [`u16`] |
+//! | 16        | [`SampleType::Integer`] | [`u16`] |
+//! | 32        | [`SampleType::Float`]   | [`f32`] |
+//!
+//! [`SampleType::Integer`]: vapoursynth4_rs::SampleType::Integer
+//! [`SampleType::Float`]: vapoursynth4_rs::SampleType::Float
 
 use core::slice;
 use std::{iter::FusedIterator, marker::PhantomData, ops::Range};
@@ -9,32 +24,40 @@ use crate::generic::HoldsVideoFormat;
 
 /// [`VideoFrame`] extensions.
 pub trait VapoursVideoFrame {
-  /// Returns the video frame's data as a slice.
+  /// Returns the video frame's data as a slice. See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
   #[must_use]
-  fn as_slice<T: From<u8>>(&self, plane: i32) -> &[T];
+  fn as_slice<T>(&self, plane: i32) -> &[T];
 
-  /// Returns the video frame's data as a mutable slice.
+  /// Returns the video frame's data as a mutable slice. See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
   #[must_use]
-  fn as_mut_slice<T: From<u8>>(&mut self, plane: i32) -> &mut [T];
+  fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T];
 
-  /// Returns an iterator over the planes of the video frame.
-  fn planes_iter<T: From<u8>>(&self) -> PlanesIter<'_, T>;
+  /// Returns an iterator over the planes of the video frame. See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn planes_iter<T>(&self) -> PlanesIter<'_, T>;
 
-  /// Returns an iterator over the mutable planes of the video frame.
-  fn planes_iter_mut<T: From<u8>>(&mut self) -> PlanesIterMut<'_, T>;
+  /// Returns an iterator over the mutable planes of the video frame. See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T>;
 }
 
 impl VapoursVideoFrame for VideoFrame {
   #[inline]
-  fn as_slice<T: From<u8>>(&self, plane: i32) -> &[T] {
+  fn as_slice<T>(&self, plane: i32) -> &[T] {
     let stride = self.stride(plane) / size_of::<T>() as isize;
-    let ptr: *const T = self.plane(plane).cast::<T>();
+    let ptr = self.plane(plane).cast::<T>();
     let len = (stride as i32) * self.frame_height(plane);
     unsafe { slice::from_raw_parts(ptr, len as usize) }
   }
 
   #[inline]
-  fn as_mut_slice<T: From<u8>>(&mut self, plane: i32) -> &mut [T] {
+  fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T] {
     let stride = self.stride(plane) / size_of::<T>() as isize;
     let ptr = self.plane_mut(plane).cast::<T>();
     let len = stride as i32 * self.frame_height(plane);
@@ -42,12 +65,12 @@ impl VapoursVideoFrame for VideoFrame {
   }
 
   #[inline]
-  fn planes_iter<T: From<u8>>(&self) -> PlanesIter<'_, T> {
+  fn planes_iter<T>(&self) -> PlanesIter<'_, T> {
     PlanesIter::new(self)
   }
 
   #[inline]
-  fn planes_iter_mut<T: From<u8>>(&mut self) -> PlanesIterMut<'_, T> {
+  fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T> {
     PlanesIterMut::new(self)
   }
 }
@@ -70,6 +93,10 @@ pub struct PlaneView<'a, T> {
 
 /// An iterator that yields the plane data of a [`VideoFrame`] along with their
 /// dimensions.
+///
+/// This struct is created by the [`planes_iter`] method.
+///
+/// [`planes_iter`]: VapoursVideoFrame::planes_iter
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct PlanesIter<'a, T> {
@@ -88,7 +115,7 @@ impl<'a, T> PlanesIter<'a, T> {
   }
 }
 
-impl<'a, T: From<u8>> Iterator for PlanesIter<'a, T> {
+impl<'a, T> Iterator for PlanesIter<'a, T> {
   type Item = PlaneView<'a, T>;
 
   #[inline]
@@ -120,7 +147,7 @@ impl<'a, T: From<u8>> Iterator for PlanesIter<'a, T> {
   }
 }
 
-impl<T: From<u8>> DoubleEndedIterator for PlanesIter<'_, T> {
+impl<T> DoubleEndedIterator for PlanesIter<'_, T> {
   fn next_back(&mut self) -> Option<Self::Item> {
     debug_assert!(self.range.start <= self.range.end);
     if self.range.is_empty() {
@@ -139,14 +166,14 @@ impl<T: From<u8>> DoubleEndedIterator for PlanesIter<'_, T> {
   }
 }
 
-impl<T: From<u8>> ExactSizeIterator for PlanesIter<'_, T> {
+impl<T> ExactSizeIterator for PlanesIter<'_, T> {
   #[inline]
   fn len(&self) -> usize {
     self.range.end - self.range.start
   }
 }
 
-impl<T: From<u8>> FusedIterator for PlanesIter<'_, T> {}
+impl<T> FusedIterator for PlanesIter<'_, T> {}
 
 /// A mutable plane view.
 pub struct PlaneViewMut<'a, T> {
@@ -165,6 +192,10 @@ pub struct PlaneViewMut<'a, T> {
 
 /// An iterator that yields the mutable plane data of a [`VideoFrame`] along
 /// with their dimensions.
+///
+/// This struct is created by the [`planes_iter_mut`] method.
+///
+/// [`planes_iter_mut`]: VapoursVideoFrame::planes_iter_mut
 #[derive(Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct PlanesIterMut<'a, T> {
@@ -183,7 +214,7 @@ impl<'a, T> PlanesIterMut<'a, T> {
   }
 }
 
-impl<'a, T: From<u8>> Iterator for PlanesIterMut<'a, T> {
+impl<'a, T> Iterator for PlanesIterMut<'a, T> {
   type Item = PlaneViewMut<'a, T>;
 
   #[inline]
@@ -217,7 +248,7 @@ impl<'a, T: From<u8>> Iterator for PlanesIterMut<'a, T> {
   }
 }
 
-impl<T: From<u8>> DoubleEndedIterator for PlanesIterMut<'_, T> {
+impl<T> DoubleEndedIterator for PlanesIterMut<'_, T> {
   fn next_back(&mut self) -> Option<Self::Item> {
     debug_assert!(self.range.start <= self.range.end);
     if self.range.is_empty() {
@@ -238,11 +269,11 @@ impl<T: From<u8>> DoubleEndedIterator for PlanesIterMut<'_, T> {
   }
 }
 
-impl<T: From<u8>> ExactSizeIterator for PlanesIterMut<'_, T> {
+impl<T> ExactSizeIterator for PlanesIterMut<'_, T> {
   #[inline]
   fn len(&self) -> usize {
     self.range.end - self.range.start
   }
 }
 
-impl<T: From<u8>> FusedIterator for PlanesIterMut<'_, T> {}
+impl<T> FusedIterator for PlanesIterMut<'_, T> {}
