@@ -16,7 +16,7 @@ num-traits = "^0.2.19"
 seq-macro = "^0.3.5"
 strum = "^0.26.3"
 strum_macros = "^0.26.4"
-thiserror = "^1.0.66"
+thiserror = "^1.0.68"
 vapoursynth4-rs = { git = "https://github.com/inflation/vapoursynth4-rs", rev = "05216423fb4316bf29f4e592ffc12c5a6e61bc25" }
 
 [dev-dependencies]
