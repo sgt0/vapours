@@ -1,11 +1,11 @@
 //! More Rust equivalents to VapourSynth enums.
 
 use seq_macro::seq;
-use vapoursynth4_rs::{ffi::VSSampleType, frame::VideoFormat, ColorFamily};
+use vapoursynth4_rs::{frame::VideoFormat, ColorFamily, SampleType};
 
 const fn make_video_format(
   color_family: ColorFamily,
-  sample_type: VSSampleType,
+  sample_type: SampleType,
   bits_per_sample: i32,
   sub_sampling_w: i32,
   sub_sampling_h: i32,
@@ -32,8 +32,8 @@ const fn make_video_format(
 const GRAY: ColorFamily = ColorFamily::Gray;
 const RGB: ColorFamily = ColorFamily::RGB;
 const YUV: ColorFamily = ColorFamily::YUV;
-const INTEGER: VSSampleType = VSSampleType::Integer;
-const FLOAT: VSSampleType = VSSampleType::Float;
+const INTEGER: SampleType = SampleType::Integer;
+const FLOAT: SampleType = SampleType::Float;
 
 seq!(N in 8..=32 {
   #[doc=concat!("GRAY color family, ", N, " bits per sample.")]
@@ -59,6 +59,7 @@ seq!(N in 8..=32 {
 pub const YUV444PH: VideoFormat = make_video_format(YUV, FLOAT, 16, 0, 0);
 pub const YUV444PS: VideoFormat = make_video_format(YUV, FLOAT, 32, 0, 0);
 
+pub const RGB24: VideoFormat = make_video_format(RGB, INTEGER, 8, 0, 0);
 pub const RGBH: VideoFormat = make_video_format(RGB, FLOAT, 16, 0, 0);
 pub const RGBS: VideoFormat = make_video_format(RGB, FLOAT, 32, 0, 0);
 
