@@ -6,6 +6,11 @@ license = "MIT"
 edition = "2021"
 homepage = "https://sgt0.github.io/vapours"
 repository = "https://github.com/sgt0/vapours"
+include = [
+  "src",
+  "Cargo.toml",
+  "LICENSE.md",
+]
 
 [features]
 default = []
