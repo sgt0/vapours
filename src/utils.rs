@@ -3,7 +3,7 @@ use strum_macros::EnumString;
 use vapoursynth4_rs::{
   core::Core,
   key,
-  map::{AppendMode, Map, Value},
+  map::{AppendMode, Value},
   node::VideoNode,
 };
 
@@ -81,20 +81,20 @@ impl VapoursCore for Core {
       ));
     };
 
-    let mut args = Map::new();
+    let mut args = self.create_map();
     args
-      .set(key!("clip"), Value::VideoNode(clip), AppendMode::Replace)
+      .set(key!(c"clip"), Value::VideoNode(clip), AppendMode::Replace)
       .map_err(|_| VapoursError::FramePropertyError("clip".to_string()))?;
     args
       .set(
-        key!("bitdepth"),
+        key!(c"bitdepth"),
         Value::Int(i64::from(bit_depth)),
         AppendMode::Replace,
       )
       .map_err(|_| VapoursError::FramePropertyError("clip".to_string()))?;
     let ret = fmtc_plugin.invoke(cstr!("bitdepth"), &args);
     ret
-      .get_video_node(key!("clip"), 0)
+      .get_video_node(key!(c"clip"), 0)
       .map_err(|_| VapoursError::FramePropertyError("clip".to_string()))
   }
 }
