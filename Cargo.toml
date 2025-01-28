@@ -1,6 +1,6 @@
 [package]
 name = "vapours"
-version = "0.1.1"
+version = "0.1.2"
 description = "A collection of utilities surrounding vapoursynth4-rs."
 license = "MIT"
 edition = "2021"
