@@ -16,7 +16,7 @@ include = [
 default = []
 
 [dependencies]
-const-str = "^0.6.0"
+const-str = "^0.6.2"
 miette = "^7.4.0"
 num-derive = "^0.4.2"
 num-traits = "^0.2.19"
