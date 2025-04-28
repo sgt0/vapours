@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2.17
+      uses: hendrikmuhs/ccache-action@v1.2.18
       with:
         key: vapoursynth-${{ inputs.vapoursynth-version }}
 
