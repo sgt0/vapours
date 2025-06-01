@@ -2,10 +2,9 @@
 
 use num_traits::ToPrimitive;
 use vapoursynth4_rs::{
-  ffi::VSColorFamily,
   frame::{VideoFormat, VideoFrame},
   node::VideoNode,
-  SampleType, VideoInfo,
+  ColorFamily, SampleType, VideoInfo,
 };
 
 use crate::enums::ColorRange;
@@ -18,7 +17,7 @@ pub trait HoldsVideoFormat: Sized {
 
   /// Get the color family of this clip or format.
   #[must_use]
-  fn color_family(&self) -> VSColorFamily {
+  fn color_family(&self) -> ColorFamily {
     self.video_format().color_family
   }
 
@@ -37,7 +36,7 @@ pub trait HoldsVideoFormat: Sized {
   /// Returns the lowest value for the bit depth of this clip or format.
   #[must_use]
   fn lowest_value(&self, chroma: Option<bool>, range_in: Option<ColorRange>) -> f32 {
-    let is_rgb = self.color_family() == VSColorFamily::RGB;
+    let is_rgb = self.color_family() == ColorFamily::RGB;
     let chroma = if is_rgb {
       false
     } else {
@@ -78,7 +77,7 @@ pub trait HoldsVideoFormat: Sized {
   /// Returns the peak value for the bit depth of this clip or format.
   #[must_use]
   fn peak_value(&self, chroma: Option<bool>, range_in: Option<ColorRange>) -> f32 {
-    let is_rgb = self.color_family() == VSColorFamily::RGB;
+    let is_rgb = self.color_family() == ColorFamily::RGB;
     let chroma = if is_rgb {
       false
     } else {
@@ -145,10 +144,10 @@ mod tests {
   use super::*;
 
   #[rstest]
-  #[case(GRAY16, VSColorFamily::Gray)]
-  #[case(RGB24, VSColorFamily::RGB)]
-  #[case(YUV420P16, VSColorFamily::YUV)]
-  fn test_color_family(#[case] format: VideoFormat, #[case] expected: VSColorFamily) {
+  #[case(GRAY16, ColorFamily::Gray)]
+  #[case(RGB24, ColorFamily::RGB)]
+  #[case(YUV420P16, ColorFamily::YUV)]
+  fn test_color_family(#[case] format: VideoFormat, #[case] expected: ColorFamily) {
     assert_eq!(format.color_family(), expected);
   }
 

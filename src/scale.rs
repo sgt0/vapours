@@ -1,7 +1,7 @@
 //! Value scaling.
 
 use num_traits::ToPrimitive;
-use vapoursynth4_rs::ffi::{VSColorFamily, VSSampleType};
+use vapoursynth4_rs::{ColorFamily, SampleType};
 
 use crate::{enums::ColorRange, generic::HoldsVideoFormat};
 
@@ -27,8 +27,8 @@ where
 {
   let scale_offsets = scale_offsets.unwrap_or(true);
 
-  let is_input_rgb = format_in.color_family() == VSColorFamily::RGB;
-  let is_output_rgb = format_out.color_family() == VSColorFamily::RGB;
+  let is_input_rgb = format_in.color_family() == ColorFamily::RGB;
+  let is_output_rgb = format_out.color_family() == ColorFamily::RGB;
 
   let range_in = range_in.unwrap_or(if is_input_rgb {
     ColorRange::Full
@@ -60,7 +60,7 @@ where
   let output_peak = format_out.peak_value(Some(chroma), Some(range_out));
   let output_lowest = format_out.lowest_value(Some(chroma), Some(range_out));
 
-  if scale_offsets && format_in.sample_type() == VSSampleType::Integer {
+  if scale_offsets && format_in.sample_type() == SampleType::Integer {
     if chroma {
       out_value -= (128 << (format_in.depth() - 8)) as f32;
     } else if range_in == ColorRange::Limited {
@@ -70,7 +70,7 @@ where
 
   out_value *= (output_peak - output_lowest) / (input_peak - input_lowest);
 
-  if scale_offsets && format_out.sample_type() == VSSampleType::Integer {
+  if scale_offsets && format_out.sample_type() == SampleType::Integer {
     if chroma {
       out_value += (128 << (format_out.depth() - 8)) as f32;
     } else if range_out == ColorRange::Limited {
@@ -78,7 +78,7 @@ where
     }
   }
 
-  if format_out.sample_type() == VSSampleType::Integer {
+  if format_out.sample_type() == SampleType::Integer {
     out_value = out_value
       .round()
       .clamp(0.0, format_out.peak_value(None, Some(ColorRange::Full)));
