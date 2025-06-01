@@ -12,3 +12,17 @@ pub enum ColorRange {
   /// ALWAYS be FULL range! RGB clips will ALWAYS be FULL range!
   Full = 0,
 }
+
+#[cfg(test)]
+mod tests {
+  use num_traits::FromPrimitive;
+
+  use super::*;
+
+  #[test]
+  fn test_from_primitive() {
+    assert_eq!(ColorRange::from_u8(0), Some(ColorRange::Full));
+    assert_eq!(ColorRange::from_u8(1), Some(ColorRange::Limited));
+    assert_eq!(ColorRange::from_u8(2), None);
+  }
+}

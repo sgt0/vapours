@@ -37,12 +37,22 @@ pub trait HoldsVideoFormat: Sized {
   /// Returns the lowest value for the bit depth of this clip or format.
   #[must_use]
   fn lowest_value(&self, chroma: Option<bool>, range_in: Option<ColorRange>) -> f32 {
-    let chroma = chroma.unwrap_or(false);
-    let range_in = range_in.unwrap_or(ColorRange::Full);
+    let is_rgb = self.color_family() == VSColorFamily::RGB;
+    let chroma = if is_rgb {
+      false
+    } else {
+      chroma.unwrap_or(false)
+    };
 
     if self.sample_type() == SampleType::Float {
       return if chroma { -0.5 } else { 0.0 };
     }
+
+    let range_in = range_in.unwrap_or(if is_rgb {
+      ColorRange::Full
+    } else {
+      ColorRange::Limited
+    });
 
     if range_in == ColorRange::Limited {
       return (16 << (self.depth() - 8))
@@ -68,12 +78,22 @@ pub trait HoldsVideoFormat: Sized {
   /// Returns the peak value for the bit depth of this clip or format.
   #[must_use]
   fn peak_value(&self, chroma: Option<bool>, range_in: Option<ColorRange>) -> f32 {
-    let chroma = chroma.unwrap_or(false);
-    let range_in = range_in.unwrap_or(ColorRange::Full);
+    let is_rgb = self.color_family() == VSColorFamily::RGB;
+    let chroma = if is_rgb {
+      false
+    } else {
+      chroma.unwrap_or(false)
+    };
 
     if self.sample_type() == SampleType::Float {
       return if chroma { 0.5 } else { 1.0 };
     }
+
+    let range_in = range_in.unwrap_or(if is_rgb {
+      ColorRange::Full
+    } else {
+      ColorRange::Limited
+    });
 
     if range_in == ColorRange::Limited {
       return (if chroma { 240 } else { 235 } << (self.depth() - 8))
@@ -108,5 +128,80 @@ impl HoldsVideoFormat for VideoInfo {
 impl HoldsVideoFormat for VideoNode {
   fn video_format(&self) -> &VideoFormat {
     self.info().video_format()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use approx::assert_relative_eq;
+  use rstest::rstest;
+  use vapoursynth4_rs::frame::VideoFormat;
+
+  use crate::vs_enums::{
+    GRAY16, GRAY8, GRAYH, GRAYS, RGB24, RGBH, RGBS, YUV420P16, YUV420P8, YUV420PS, YUV444P16,
+    YUV444P8, YUV444PS,
+  };
+
+  use super::*;
+
+  #[rstest]
+  #[case(GRAY16, VSColorFamily::Gray)]
+  #[case(RGB24, VSColorFamily::RGB)]
+  #[case(YUV420P16, VSColorFamily::YUV)]
+  fn test_color_family(#[case] format: VideoFormat, #[case] expected: VSColorFamily) {
+    assert_eq!(format.color_family(), expected);
+  }
+
+  #[rstest]
+  #[case(GRAY8, 16.0)]
+  #[case(GRAY16, 4096.0)]
+  #[case(RGB24, 0.0)]
+  #[case(RGBH, 0.0)]
+  #[case(RGBS, 0.0)]
+  #[case(YUV420P8, 16.0)]
+  #[case(YUV420P16, 4096.0)]
+  #[case(YUV420PS, 0.0)]
+  #[case(YUV444P8, 16.0)]
+  #[case(YUV444P16, 4096.0)]
+  #[case(YUV444PS, 0.0)]
+  fn test_lowest_value_defaults(#[case] format: VideoFormat, #[case] expected: f32) {
+    assert_relative_eq!(format.lowest_value(None, None), expected);
+  }
+
+  #[rstest]
+  #[case(GRAY8, 16.0)]
+  #[case(GRAY16, 4096.0)]
+  #[case(RGB24, 0.0)]
+  #[case(RGBH, 0.0)]
+  #[case(RGBS, 0.0)]
+  #[case(YUV420P8, 16.0)]
+  #[case(YUV420P16, 4096.0)]
+  #[case(YUV420PS, -0.5)]
+  #[case(YUV444P8, 16.0)]
+  #[case(YUV444P16, 4096.0)]
+  #[case(YUV444PS, -0.5)]
+  fn test_lowest_value_chroma(#[case] format: VideoFormat, #[case] expected: f32) {
+    assert_relative_eq!(format.lowest_value(Some(true), None), expected);
+  }
+
+  #[rstest]
+  #[case(GRAY8, 128.0)]
+  #[case(GRAY16, 32768.0)]
+  #[case(GRAYH, 0.0)]
+  #[case(GRAYS, 0.0)]
+  fn test_neutral_value_defaults(#[case] format: VideoFormat, #[case] expected: f32) {
+    assert_relative_eq!(format.neutral_value(), expected);
+  }
+
+  #[rstest]
+  #[case(GRAY8, 235.0)]
+  #[case(GRAY16, 60160.0)]
+  #[case(GRAYH, 1.0)]
+  #[case(GRAYS, 1.0)]
+  #[case(RGB24, 255.0)]
+  #[case(RGBH, 1.0)]
+  #[case(RGBS, 1.0)]
+  fn test_peak_value_defaults(#[case] format: VideoFormat, #[case] expected: f32) {
+    assert_relative_eq!(format.peak_value(None, None), expected);
   }
 }
