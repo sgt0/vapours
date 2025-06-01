@@ -2,7 +2,7 @@
 
 vapours is a collection of utilities surrounding [vapoursynth4-rs](https://github.com/inflation/vapoursynth4-rs).
 Generally these aid in VapourSynth plugin development. vapours can also be seen
-as a Rust equivalent to [vs-tools](https://github.com/Jaded-Encoding-Thaumaturgy/vs-tools)
+as a Rust equivalent to [vs-tools](https://github.com/Jaded-Encoding-Thaumaturgy/vs-jetpack/tree/main/vstools)
 to some extent.
 
 For example, the classic invert filter goes from this:
