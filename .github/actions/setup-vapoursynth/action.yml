@@ -13,7 +13,7 @@ runs:
         key: vapoursynth-${{ inputs.vapoursynth-version }}
 
     - name: Checkout zimg
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v4.3.0
       with:
         repository: sekrit-twc/zimg
         path: zimg
@@ -46,7 +46,7 @@ runs:
       run: uv pip install --system -U cython
 
     - name: Checkout VapourSynth
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v4.3.0
       with:
         repository: vapoursynth/vapoursynth
         ref: R${{ inputs.vapoursynth-version }}
