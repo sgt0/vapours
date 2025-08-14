@@ -119,7 +119,7 @@ jobs:
       - name: Create index page
         run: echo "<meta http-equiv=\"refresh\" content=\"0; url=vapours/index.html\">" \ > ./target/doc/index.html
 
-      - uses: actions/upload-pages-artifact@v3.0.1
+      - uses: actions/upload-pages-artifact@v4.0.0
         with:
           path: target/doc
 
