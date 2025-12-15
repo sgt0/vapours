@@ -39,7 +39,7 @@ runs:
         python-version: 3.14.2
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v7.1.4
+      uses: astral-sh/setup-uv@v7.1.6
 
     - name: Install Python dependencies
       shell: bash
