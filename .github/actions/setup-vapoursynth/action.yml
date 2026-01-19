@@ -8,12 +8,12 @@ runs:
   using: composite
   steps:
     - name: Set up ccache
-      uses: hendrikmuhs/ccache-action@v1.2.20
+      uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
       with:
         key: vapoursynth-${{ inputs.vapoursynth-version }}
 
     - name: Checkout zimg
-      uses: actions/checkout@v6.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       with:
         repository: sekrit-twc/zimg
         path: zimg
@@ -34,19 +34,19 @@ runs:
         rm -rf zimg
 
     - name: Set up Python
-      uses: actions/setup-python@v6.1.0
+      uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: 3.14.2
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v7.2.0
+      uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
 
     - name: Install Python dependencies
       shell: bash
       run: uv pip install --system -U cython
 
     - name: Checkout VapourSynth
-      uses: actions/checkout@v6.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       with:
         repository: vapoursynth/vapoursynth
         ref: R${{ inputs.vapoursynth-version }}
