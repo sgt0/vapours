@@ -11,6 +11,7 @@ use crate::{enums::ColorRange, generic::HoldsVideoFormat};
 ///
 /// Will panic if the input value cannot fit in a [`f32`].
 #[must_use]
+#[allow(clippy::cast_precision_loss)]
 pub fn scale_value<T, U, V>(
   value: T,
   format_in: &U,
