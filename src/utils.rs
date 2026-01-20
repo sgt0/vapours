@@ -72,6 +72,8 @@ pub trait VapoursCore {
 }
 
 impl VapoursCore for Core {
+  #[allow(unreachable_code)]
+  #[allow(unused_variables)]
   fn depth(&self, clip: VideoNode, bit_depth: u32) -> Result<VideoNode, VapoursError> {
     todo!("Needs configurable dither type, non-fmtc dithering, and probably more.");
 
