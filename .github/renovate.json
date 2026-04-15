@@ -2,10 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:best-practices",
+    ":automergeMinor",
+    ":automergePr",
+    ":automergeRequireAllStatusChecks",
     ":disableDependencyDashboard",
     ":disableRateLimiting",
-    ":semanticCommits",
-    ":semanticCommitScope(deps)"
+    ":semanticCommits"
   ],
   "rangeStrategy": "bump"
 }
