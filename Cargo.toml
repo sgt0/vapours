@@ -18,7 +18,7 @@ default = []
 [dependencies]
 const-str = "^1.1.0"
 miette = "^7.6.0"
-num-derive = "^0.4.2"
+num-derive = "^0.5.1"
 num-traits = "^0.2.19"
 seq-macro = "^0.3.6"
 strum = "^0.28.0"
