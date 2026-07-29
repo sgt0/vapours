@@ -100,7 +100,7 @@ jobs:
           toolchain: nightly
 
       - name: Install cargo-nextest
-        uses: taiki-e/install-action@37ba67210166984a515120020147f0b4ae3b8667 # nextest
+        uses: taiki-e/install-action@a6e08638ce5ee7b285b1e051c006e3be64fcff91 # nextest
 
       - name: Run tests
         run: cargo nextest run --all-features --workspace
