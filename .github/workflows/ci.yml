@@ -77,9 +77,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: cargo-bins/cargo-binstall@e00d2c94cc0067b77737821097a62d91c0301baa # v1.21.1
-
-      - run: cargo binstall --no-confirm cargo-shear
+      - name: Install cargo-shear
+        uses: taiki-e/install-action@88d897fbe3f79ed72a43e0dcbca36156ff03344e # v2.67.14
+        with:
+          tool: cargo-shear
 
       - run: cargo shear
 
@@ -100,7 +101,9 @@ jobs:
           toolchain: nightly
 
       - name: Install cargo-nextest
-        uses: taiki-e/install-action@37ba67210166984a515120020147f0b4ae3b8667 # nextest
+        uses: taiki-e/install-action@88d897fbe3f79ed72a43e0dcbca36156ff03344e # v2.67.14
+        with:
+          tool: cargo-nextest
 
       - name: Run tests
         run: cargo nextest run --all-features --workspace
