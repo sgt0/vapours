@@ -93,7 +93,7 @@ mod tests {
   use approx::assert_relative_eq;
   use rstest::rstest;
 
-  use crate::vs_enums::{GRAY10, GRAY8, YUV444PS};
+  use crate::vs_enums::{GRAY8, GRAY10, YUV444PS};
 
   use super::*;
 

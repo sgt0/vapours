@@ -2,9 +2,9 @@
 
 use num_traits::ToPrimitive;
 use vapoursynth4_rs::{
+  ColorFamily, SampleType, VideoInfo,
   frame::{VideoFormat, VideoFrame},
   node::VideoNode,
-  ColorFamily, SampleType, VideoInfo,
 };
 
 use crate::enums::ColorRange;
@@ -137,8 +137,8 @@ mod tests {
   use vapoursynth4_rs::frame::VideoFormat;
 
   use crate::vs_enums::{
-    GRAY16, GRAY8, GRAYH, GRAYS, RGB24, RGBH, RGBS, YUV420P16, YUV420P8, YUV420PS, YUV444P16,
-    YUV444P8, YUV444PS,
+    GRAY8, GRAY16, GRAYH, GRAYS, RGB24, RGBH, RGBS, YUV420P8, YUV420P16, YUV420PS, YUV444P8,
+    YUV444P16, YUV444PS,
   };
 
   use super::*;

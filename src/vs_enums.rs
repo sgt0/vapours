@@ -1,7 +1,7 @@
 //! More Rust equivalents to VapourSynth enums.
 
 use seq_macro::seq;
-use vapoursynth4_rs::{frame::VideoFormat, ColorFamily, SampleType};
+use vapoursynth4_rs::{ColorFamily, SampleType, frame::VideoFormat};
 
 const fn make_video_format(
   color_family: ColorFamily,
