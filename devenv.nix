@@ -7,5 +7,10 @@
 }: {
   languages.rust.enable = true;
 
-  git-hooks.hooks.alejandra.enable = true;
+  git-hooks.hooks = {
+    alejandra.enable = true;
+    cargo-check.enable = true;
+    clippy.enable = true;
+    rustfmt.enable = true;
+  };
 }
