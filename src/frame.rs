@@ -27,12 +27,22 @@ pub trait VapoursVideoFrame {
   /// Returns the video frame's data as a slice. See the
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
+  ///
+  /// The slice covers `stride(plane) * frame_height(plane)` bytes, not
+  /// `width * height` pixels. Each row is padded to the stride, so it may
+  /// contain trailing elements past `frame_width(plane)`. The row pitch in
+  /// elements is `stride(plane) / size_of::<T>()`.
   #[must_use]
   fn as_slice<T>(&self, plane: i32) -> &[T];
 
   /// Returns the video frame's data as a mutable slice. See the
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
+  ///
+  /// The slice covers `stride(plane) * frame_height(plane)` bytes, not
+  /// `width * height` pixels. Each row is padded to the stride, so it may
+  /// contain trailing elements past `frame_width(plane)`. The row pitch in
+  /// elements is `stride(plane) / size_of::<T>()`.
   #[must_use]
   fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T];
 
