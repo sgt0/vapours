@@ -6,6 +6,8 @@
 //! For example, the classic invert filter goes from this:
 //!
 //! ```rust
+//! # use vapoursynth4_rs::frame::{VideoFormat, VideoFrame};
+//! # fn invert(fi: &VideoFormat, src: &VideoFrame, dst: &mut VideoFrame) {
 //! for plane in 0..fi.num_planes {
 //!     let mut src_p = src.plane(plane);
 //!     let src_stride = src.stride(plane);
@@ -24,24 +26,27 @@
 //!         dst_p = dst_p.wrapping_offset(dst_stride);
 //!     }
 //! }
+//! # }
 //! ```
 //!
 //! To this:
 //!
 //! ```rust
-//! // Bring in extensions on `VideoFrame` like `as_slice()` and `as_mut_slice()`.
+//! // Bring in extensions on `VideoFrame` like `rows()` and `rows_mut()`.
 //! use vapours::frame::VapoursVideoFrame;
 //!
 //! // ...
 //!
+//! # use vapoursynth4_rs::frame::{VideoFormat, VideoFrame};
+//! # fn invert(fi: &VideoFormat, src: &VideoFrame, dst: &mut VideoFrame) {
 //! for plane in 0..fi.num_planes {
-//!     let src_slice = src.as_slice::<u8>(plane);
-//!     let dst_slice = dst.as_mut_slice::<u8>(plane);
-//!
-//!     for (src_pixel, dst_pixel) in zip(src_slice, dst_slice) {
-//!         *dst_pixel = !*src_pixel;
+//!     for (src_row, dst_row) in src.rows::<u8>(plane).zip(dst.rows_mut::<u8>(plane)) {
+//!         for (src_pixel, dst_pixel) in src_row.iter().zip(dst_row) {
+//!             *dst_pixel = !*src_pixel;
+//!         }
 //!     }
 //! }
+//! # }
 //! ```
 
 #[macro_use]

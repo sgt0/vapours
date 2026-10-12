@@ -55,6 +55,18 @@ pub trait VapoursVideoFrame {
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
   fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T>;
+
+  /// Returns an iterator over the rows of `plane`, each trimmed to
+  /// `frame_width(plane)` elements (stride padding excluded). See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn rows<'a, T: 'a>(&'a self, plane: i32) -> impl Iterator<Item = &'a [T]>;
+
+  /// Returns an iterator over the mutable rows of `plane`, each trimmed to
+  /// `frame_width(plane)` elements (stride padding excluded). See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn rows_mut<'a, T: 'a>(&'a mut self, plane: i32) -> impl Iterator<Item = &'a mut [T]>;
 }
 
 impl VapoursVideoFrame for VideoFrame {
@@ -82,6 +94,26 @@ impl VapoursVideoFrame for VideoFrame {
   #[inline]
   fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T> {
     PlanesIterMut::new(self)
+  }
+
+  #[inline]
+  fn rows<'a, T: 'a>(&'a self, plane: i32) -> impl Iterator<Item = &'a [T]> {
+    let stride = self.stride(plane) as usize / size_of::<T>();
+    let width = self.frame_width(plane) as usize;
+    self
+      .as_slice(plane)
+      .chunks_exact(stride)
+      .map(move |r| &r[..width])
+  }
+
+  #[inline]
+  fn rows_mut<'a, T: 'a>(&'a mut self, plane: i32) -> impl Iterator<Item = &'a mut [T]> {
+    let stride = self.stride(plane) as usize / size_of::<T>();
+    let width = self.frame_width(plane) as usize;
+    self
+      .as_mut_slice(plane)
+      .chunks_exact_mut(stride)
+      .map(move |r| &mut r[..width])
   }
 }
 
