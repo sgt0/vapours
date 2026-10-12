@@ -31,17 +31,16 @@ for plane in 0..fi.num_planes {
 To this:
 
 ```rust
-// Bring in extensions on `VideoFrame` like `as_slice()` and `as_mut_slice()`.
+// Bring in extensions on `VideoFrame` like `rows()` and `rows_mut()`.
 use vapours::frame::VapoursVideoFrame;
 
 // ...
 
 for plane in 0..fi.num_planes {
-    let src_slice = src.as_slice::<u8>(plane);
-    let dst_slice = dst.as_mut_slice::<u8>(plane);
-
-    for (src_pixel, dst_pixel) in zip(src_slice, dst_slice) {
-        *dst_pixel = !*src_pixel;
+    for (src_row, dst_row) in src.rows::<u8>(plane).zip(dst.rows_mut::<u8>(plane)) {
+        for (src_pixel, dst_pixel) in src_row.iter().zip(dst_row) {
+            *dst_pixel = !*src_pixel;
+        }
     }
 }
 ```
