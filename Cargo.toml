@@ -24,7 +24,7 @@ seq-macro = "^0.3.6"
 strum = "^0.28.0"
 strum_macros = "^0.28.0"
 thiserror = "^2.0.21"
-vapoursynth4-rs = "^0.5.1"
+vapoursynth4-rs = "^0.6.0"
 
 [dev-dependencies]
 approx = "=0.5.1"

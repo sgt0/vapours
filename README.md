@@ -32,7 +32,7 @@ To this:
 
 ```rust
 // Bring in extensions on `VideoFrame` like `rows()` and `rows_mut()`.
-use vapours::frame::VapoursVideoFrame;
+use vapours::frame::{VapoursVideoFrame, VapoursVideoFrameMut};
 
 // ...
 

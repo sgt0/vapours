@@ -18,12 +18,16 @@
 use core::slice;
 use std::{iter::FusedIterator, marker::PhantomData, ops::Range};
 
-use vapoursynth4_rs::frame::VideoFrame;
+use vapoursynth4_rs::frame::{Shared, VideoFrame, VideoFrameMut};
 
 use crate::generic::HoldsVideoFormat;
 
 /// [`VideoFrame`] extensions.
 pub trait VapoursVideoFrame {
+  /// The frame's ownership state, either [`Shared`] or
+  /// [`Writable`](vapoursynth4_rs::frame::Writable).
+  type State;
+
   /// Returns the video frame's data as a slice. See the
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
@@ -35,6 +39,20 @@ pub trait VapoursVideoFrame {
   #[must_use]
   fn as_slice<T>(&self, plane: i32) -> &[T];
 
+  /// Returns an iterator over the planes of the video frame. See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn planes_iter<T>(&self) -> PlanesIter<'_, T, Self::State>;
+
+  /// Returns an iterator over the rows of `plane`, each trimmed to
+  /// `frame_width(plane)` elements (stride padding excluded). See the
+  /// [module-level documentation](self) for more information about the pixel
+  /// type `T`.
+  fn rows<'a, T: 'a>(&'a self, plane: i32) -> impl Iterator<Item = &'a [T]>;
+}
+
+/// [`VideoFrameMut`] extensions.
+pub trait VapoursVideoFrameMut: VapoursVideoFrame {
   /// Returns the video frame's data as a mutable slice. See the
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
@@ -46,21 +64,10 @@ pub trait VapoursVideoFrame {
   #[must_use]
   fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T];
 
-  /// Returns an iterator over the planes of the video frame. See the
-  /// [module-level documentation](self) for more information about the pixel
-  /// type `T`.
-  fn planes_iter<T>(&self) -> PlanesIter<'_, T>;
-
   /// Returns an iterator over the mutable planes of the video frame. See the
   /// [module-level documentation](self) for more information about the pixel
   /// type `T`.
   fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T>;
-
-  /// Returns an iterator over the rows of `plane`, each trimmed to
-  /// `frame_width(plane)` elements (stride padding excluded). See the
-  /// [module-level documentation](self) for more information about the pixel
-  /// type `T`.
-  fn rows<'a, T: 'a>(&'a self, plane: i32) -> impl Iterator<Item = &'a [T]>;
 
   /// Returns an iterator over the mutable rows of `plane`, each trimmed to
   /// `frame_width(plane)` elements (stride padding excluded). See the
@@ -69,7 +76,9 @@ pub trait VapoursVideoFrame {
   fn rows_mut<'a, T: 'a>(&'a mut self, plane: i32) -> impl Iterator<Item = &'a mut [T]>;
 }
 
-impl VapoursVideoFrame for VideoFrame {
+impl<S> VapoursVideoFrame for VideoFrame<S> {
+  type State = S;
+
   #[inline]
   fn as_slice<T>(&self, plane: i32) -> &[T] {
     let stride = self.stride(plane) / size_of::<T>() as isize;
@@ -79,21 +88,8 @@ impl VapoursVideoFrame for VideoFrame {
   }
 
   #[inline]
-  fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T] {
-    let stride = self.stride(plane) / size_of::<T>() as isize;
-    let ptr = self.plane_mut(plane).cast::<T>();
-    let len = stride as i32 * self.frame_height(plane);
-    unsafe { slice::from_raw_parts_mut(ptr, len as usize) }
-  }
-
-  #[inline]
-  fn planes_iter<T>(&self) -> PlanesIter<'_, T> {
+  fn planes_iter<T>(&self) -> PlanesIter<'_, T, Self::State> {
     PlanesIter::new(self)
-  }
-
-  #[inline]
-  fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T> {
-    PlanesIterMut::new(self)
   }
 
   #[inline]
@@ -104,6 +100,21 @@ impl VapoursVideoFrame for VideoFrame {
       .as_slice(plane)
       .chunks_exact(stride)
       .map(move |r| &r[..width])
+  }
+}
+
+impl VapoursVideoFrameMut for VideoFrameMut {
+  #[inline]
+  fn as_mut_slice<T>(&mut self, plane: i32) -> &mut [T] {
+    let stride = self.stride(plane) / size_of::<T>() as isize;
+    let ptr = self.plane_mut(plane).cast::<T>();
+    let len = stride as i32 * self.frame_height(plane);
+    unsafe { slice::from_raw_parts_mut(ptr, len as usize) }
+  }
+
+  #[inline]
+  fn planes_iter_mut<T>(&mut self) -> PlanesIterMut<'_, T> {
+    PlanesIterMut::new(self)
   }
 
   #[inline]
@@ -141,14 +152,14 @@ pub struct PlaneView<'a, T> {
 /// [`planes_iter`]: VapoursVideoFrame::planes_iter
 #[derive(Clone, Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
-pub struct PlanesIter<'a, T> {
-  frame: &'a VideoFrame,
+pub struct PlanesIter<'a, T, S = Shared> {
+  frame: &'a VideoFrame<S>,
   range: Range<usize>,
   _marker: PhantomData<&'a T>,
 }
 
-impl<'a, T> PlanesIter<'a, T> {
-  pub(super) fn new(frame: &'a VideoFrame) -> Self {
+impl<'a, T, S> PlanesIter<'a, T, S> {
+  pub(super) fn new(frame: &'a VideoFrame<S>) -> Self {
     Self {
       frame,
       range: 0..frame.video_format().num_planes as usize,
@@ -157,7 +168,7 @@ impl<'a, T> PlanesIter<'a, T> {
   }
 }
 
-impl<'a, T> Iterator for PlanesIter<'a, T> {
+impl<'a, T, S> Iterator for PlanesIter<'a, T, S> {
   type Item = PlaneView<'a, T>;
 
   #[inline]
@@ -189,7 +200,7 @@ impl<'a, T> Iterator for PlanesIter<'a, T> {
   }
 }
 
-impl<T> DoubleEndedIterator for PlanesIter<'_, T> {
+impl<T, S> DoubleEndedIterator for PlanesIter<'_, T, S> {
   fn next_back(&mut self) -> Option<Self::Item> {
     debug_assert!(self.range.start <= self.range.end);
     if self.range.is_empty() {
@@ -208,14 +219,14 @@ impl<T> DoubleEndedIterator for PlanesIter<'_, T> {
   }
 }
 
-impl<T> ExactSizeIterator for PlanesIter<'_, T> {
+impl<T, S> ExactSizeIterator for PlanesIter<'_, T, S> {
   #[inline]
   fn len(&self) -> usize {
     self.range.end - self.range.start
   }
 }
 
-impl<T> FusedIterator for PlanesIter<'_, T> {}
+impl<T, S> FusedIterator for PlanesIter<'_, T, S> {}
 
 /// A mutable plane view.
 pub struct PlaneViewMut<'a, T> {
@@ -232,22 +243,22 @@ pub struct PlaneViewMut<'a, T> {
   pub stride: isize,
 }
 
-/// An iterator that yields the mutable plane data of a [`VideoFrame`] along
+/// An iterator that yields the mutable plane data of a [`VideoFrameMut`] along
 /// with their dimensions.
 ///
 /// This struct is created by the [`planes_iter_mut`] method.
 ///
-/// [`planes_iter_mut`]: VapoursVideoFrame::planes_iter_mut
+/// [`planes_iter_mut`]: VapoursVideoFrameMut::planes_iter_mut
 #[derive(Debug)]
 #[must_use = "iterators are lazy and do nothing unless consumed"]
 pub struct PlanesIterMut<'a, T> {
-  frame: *mut VideoFrame,
+  frame: *mut VideoFrameMut,
   range: Range<usize>,
   _marker: PhantomData<&'a mut T>,
 }
 
 impl<'a, T> PlanesIterMut<'a, T> {
-  pub(super) fn new(frame: &'a mut VideoFrame) -> Self {
+  pub(super) fn new(frame: &'a mut VideoFrameMut) -> Self {
     Self {
       frame,
       range: 0..frame.video_format().num_planes as usize,
