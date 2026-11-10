@@ -106,7 +106,7 @@ pub trait HoldsVideoFormat: Sized {
   }
 }
 
-impl HoldsVideoFormat for VideoFrame {
+impl<S> HoldsVideoFormat for VideoFrame<S> {
   fn video_format(&self) -> &VideoFormat {
     self.get_video_format()
   }
